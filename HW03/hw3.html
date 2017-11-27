@@ -19,7 +19,7 @@
 <br>Hw3
 <br>
 <button id='Change'>Change Camera Mode</button>
-
+<button id='hint'> How to control</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js">
@@ -88,6 +88,10 @@
         camera.position.set(0,50,250);
     }
     mode=!mode;
+  });
+  $("#hint").click(function() {
+
+    alert("Use 'W' 'S' to mov on X axis 'J' 'L' 'I' 'K' to aim  SPACE to fire");
   });
 
   function buildParts() {
