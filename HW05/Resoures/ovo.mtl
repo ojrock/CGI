@@ -1,0 +1,42 @@
+# Blender MTL File: 'None'
+# Material Count: 4
+
+newmtl Dull_Plastic
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.170820 0.174909 0.169819
+Ks 0.013725 0.013333 0.013333
+Ni 1.000000
+d 1.000000
+illum 2
+map_Bump NoiseBump.jpg
+
+newmtl MatrixRainWall
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.690196 0.690196 0.690196
+Ks 0.100000 0.100000 0.100000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd matrix.jpg
+
+newmtl Wood1
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.014902 0.009804 0.006275
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd AfricanEbonyBoards-ColorMap.png
+
+newmtl Wood_Light
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 1.000000 1.000000 1.000000
+Ks 0.010980 0.009804 0.009412
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd WoodLight_COLOR.png

@@ -1,0 +1,291 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+#info {
+  position: absolute;
+  top: 2%;
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  color: #ffff00
+}
+
+</style>
+</head>
+<body>
+<div id="info">
+<br>Hw5
+<br>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/87/three.min.js">
+</script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js">
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/r16/Stats.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://jyunming-chen.github.io/tutsplus/js/KeyboardState.js"></script>
+
+<script src="https://rawgit.com/mrdoob/three.js/master/examples/js/loaders/MTLLoader.js"></script>
+<script src="https://rawgit.com/mrdoob/three.js/master/examples/js/loaders/OBJLoader.js"></script>
+<script src="button.js"></script>
+<script>
+  var camera, scene, renderer;
+  var controls;
+  var keyboard = new KeyboardState();
+  var raycaster = new THREE.Raycaster();
+  var pickables = [];
+  var mouse = new THREE.Vector2()
+  var button , button2;
+  var slight = [];
+  var slight_b=[];
+
+
+  init();
+  animate();
+  function init() {
+
+    renderer = new THREE.WebGLRenderer({
+      antialias: true
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x333333);
+
+    document.body.appendChild(renderer.domElement);
+
+
+    camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+    camera.position.z = 30;  // important
+    camera.position.y = 100;
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+    scene = new THREE.Scene();
+    var grid = new THREE.GridHelper(200, 20, 'red', 'white');
+
+    scene.add(grid);
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    var ambient = new THREE.AmbientLight(0xbbbbbb);
+	  scene.add(ambient);
+    //////////////////////////////////////////////////////////////////////////////
+
+    var mtlLoader = new THREE.MTLLoader();
+    mtlLoader.setPath('Resoures/');
+   	mtlLoader.load('ovo.mtl', function(materials) {
+      materials.preload();
+
+      var objLoader = new THREE.OBJLoader();
+      objLoader.setMaterials(materials);
+      objLoader.setPath('Resoures/');
+      objLoader.load('ovo.obj', function(object) {
+
+  			var theObject =  unitize (object, 90);
+        theObject.position.set(0,0,30);
+        theObject.rotation.y=Math.PI;
+  			scene.add (theObject);
+
+  			object.traverse (
+  				function(mesh) {
+  					if (mesh instanceof THREE.Mesh) {
+  						mesh.material.side = THREE.DoubleSide;
+  					}
+  				});
+
+      });
+
+    });
+		var mtlLoader2 = new THREE.MTLLoader();
+    mtlLoader2.setPath('Resoures/');
+   	mtlLoader2.load('chair.mtl', function(materials) {
+      materials.preload();
+
+      var objLoader2 = new THREE.OBJLoader();
+      objLoader2.setMaterials(materials);
+      objLoader2.setPath('Resoures/');
+      objLoader2.load('chair.obj', function(object) {
+
+  			var theObject =  unitize (object, 40);
+
+  			scene.add (theObject);
+
+  			object.traverse (
+  				function(mesh) {
+  					if (mesh instanceof THREE.Mesh) {
+  						mesh.material.side = THREE.DoubleSide;
+  					}
+  				});
+
+      });
+
+    });
+    window.addEventListener('resize', onWindowResize, false);
+    document.addEventListener('mousedown', onDocumentMouseDown, false);
+
+    ///////////////////////////////////////////////////////////
+
+    button = new Button(new THREE.Color (0x12ffff), 'button1');
+    scene.add(button.obj);
+    pickables.push(button.obj);
+    button.obj.position.set(0,23,23);
+
+    button2 = new Button(new THREE.Color (0xff12ff), 'button2');
+    scene.add(button2.obj);
+    button2.obj.position.set(10,23,23);
+    pickables.push(button2.obj);
+    ///////////////////////////////////////////////////////////
+
+    for(var i = 0 ; i < 2 ; i++){
+      slight[i] = makelight();
+      slight_b[i]= buildSLightBody();
+      scene.add(slight[i]);
+      slight_b[i].eulerOrder = 'ZYX';
+      scene.add(slight_b[i]);
+    }
+    slight[0].position.set(20,70,100);
+    slight[0].target = button.obj;
+    slight_b[0].position.set(20,70,100);
+    slight_b[0].rotation.y=Math.PI;
+
+    slight[1].position.set(-20,70,100);
+    slight[1].target = button2.obj;
+    slight_b[1].position.set(-20,70,100);
+    slight_b[1].rotation.y=Math.PI-0.3;
+
+
+
+  }
+
+  function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  }
+
+
+  function onDocumentMouseDown(event) {
+
+    event.preventDefault();
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    // find intersections
+    raycaster.setFromCamera(mouse, camera);
+    var intersects = raycaster.intersectObjects(pickables, true);
+    if (intersects.length > 0) {
+      let picked = intersects[0].object.parent.name;
+      switch (picked) {
+      case 'button1':
+      	button.toggle();
+        break;
+      case 'button2':
+      	button2.toggle();
+        break;
+      }
+    }
+
+  }
+
+  function animate() {
+
+    keyboard.update();
+    if(button.isOn){
+      slight[0].intensity = 1;
+    }
+    else{
+      slight[0].intensity = 0;
+    }
+    if(button2.isOn){
+      slight[1].intensity = 1;
+    }
+    else{
+      slight[1].intensity = 0;
+    }
+    controls.update();
+    requestAnimationFrame(animate);
+    render();
+
+  }
+
+  function render() {
+    renderer.render(scene, camera);
+  }
+
+  function unitize (object, targetSize) {
+
+  	// find bounding box of 'object'
+  	var box3 = new THREE.Box3();
+  	box3.setFromObject (object);
+  	var size = new THREE.Vector3();
+  	size.subVectors (box3.max, box3.min);
+  	var center = new THREE.Vector3();
+  	center.addVectors(box3.max, box3.min).multiplyScalar (0.5);
+
+  	console.log ('center: ' + center.x + ', '+center.y + ', '+center.z );
+  	console.log ('size: ' + size.x + ', ' +  size.y + ', '+size.z );
+
+  	// uniform scaling according to objSize
+  	var objSize = findMax (size);
+  	var scaleSet = targetSize/objSize;
+
+  	var theObject =  new THREE.Object3D();
+  	theObject.add (object);
+  	object.scale.set (scaleSet, scaleSet, scaleSet);
+  	object.position.set (-center.x*scaleSet, -center.y*scaleSet + size.y/2*scaleSet, -center.z*scaleSet);
+
+  	return theObject;
+
+
+  	// helper function
+  	function findMax(v) {
+  		if (v.x > v.y) {
+  			return v.x > v.z ? v.x : v.z;
+  		} else { // v.y > v.x
+  			return v.y > v.z ? v.y : v.z;
+  		}
+  	}
+
+  }
+
+  function makelight() {
+    var spotLight = new THREE.SpotLight();
+    spotLight.angle = Math.PI / 16;
+    spotLight.penumbra = 0.25;
+    //spotLight.intensity = 0.3;
+
+    spotLight.castShadow = true;
+    spotLight.shadow.mapSize.width = 1024;
+    spotLight.shadow.mapSize.height = 1024;
+
+    spotLight.shadow.camera.near = 50;
+    spotLight.shadow.camera.far = 1000;
+    spotLight.shadow.camera.fov = 30;
+    return spotLight;
+  }
+
+  function buildSLightBody() {
+
+      var body = new THREE.Object3D();
+      var temp = new THREE.Object3D();
+      var mesh = new THREE.Mesh(new THREE.CylinderGeometry(10, 5, 20, 32, 1, true), new THREE.MeshLambertMaterial({
+        color: 0xffee9f,
+        side: THREE.DoubleSide
+      }));
+      var bottom = new THREE.Mesh(new THREE.CircleGeometry(5, 32), new THREE.MeshLambertMaterial({
+        color: 0xffee9f
+      }));
+      mesh.position.y = 10;
+      bottom.rotation.x = Math.PI / 2;
+
+      temp.add(mesh, bottom);
+      temp.rotation.x = Math.PI / 2;
+      body.add(temp);
+  		body.rotation.x=Math.PI/4;
+      return body;
+
+  }
+
+</script>
+</body>
+
+</html>
